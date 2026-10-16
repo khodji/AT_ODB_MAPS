@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Distribution cabinet outer frame -->
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M30,24 h48 c3.3,0 6,2.7 6,6 v48 c0,3.3 -2.7,6 -6,6 h-48 c-3.3,0 -6,-2.7 -6,-6 v-48 c0,-3.3 2.7,-6 6,-6 z" />
+    <path
+        android:fillColor="#0D47A1"
+        android:pathData="M34,28 h40 c2.2,0 4,1.8 4,4 v40 c0,2.2 -1.8,4 -4,4 h-40 c-2.2,0 -4,-1.8 -4,-4 v-40 c0,-2.2 1.8,-4 4,-4 z" />
+    <!-- Center divider door -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:pathData="M54,28 v48" />
+    <!-- Rows of terminal blocks (gold, green, cyan) -->
+    <path
+        android:fillColor="#FFB300"
+        android:pathData="M38,34 h12 v5 h-12 z M58,34 h12 v5 h-12 z" />
+    <path
+        android:fillColor="#00E676"
+        android:pathData="M38,43 h12 v5 h-12 z M58,43 h12 v5 h-12 z" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M38,52 h12 v5 h-12 z M58,52 h12 v5 h-12 z" />
+    <!-- Indicator dots -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,36.5 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0 M46,36.5 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0 M60,36.5 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0 M66,36.5 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0" />
+    <!-- Location Pin Symbol on corner -->
+    <path
+        android:fillColor="#FF1744"
+        android:pathData="M68,54 c-5.5,0 -10,4.5 -10,10 c0,7.5 10,18 10,18 s10,-10.5 10,-18 c0,-5.5 -4.5,-10 -10,-10 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M68,64 a3.5,3.5 0 1,0 0.001,0 z" />
+</vector>

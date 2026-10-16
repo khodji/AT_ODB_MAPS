@@ -1,0 +1,6 @@
+{
+  "name": "علب اتصالات الجزائر",
+  "description": "تطبيق ميداني أوفلاين لإدارة علب توزيع الإنترنت (PCP) والمشتركين لعمال اتصالات الجزائر بولاية بسكرة وطولقة",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

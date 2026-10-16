@@ -1,0 +1,26 @@
+{
+  "name": "علب اتصالات الجزائر - PCP",
+  "short_name": "علب التوزيع",
+  "description": "تطبيق ميداني بدون إنترنت لإدارة علب توزيع الإنترنت (PCP) والمشتركين لعمال اتصالات الجزائر",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0D47A1",
+  "theme_color": "#0D47A1",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

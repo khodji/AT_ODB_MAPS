@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0D47A1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>علب اتصالات الجزائر - PCP DZ</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <!-- Local Leaflet and MarkerCluster (100% Offline) -->
+  <link rel="stylesheet" href="libs/leaflet.css">
+  <link rel="stylesheet" href="libs/MarkerCluster.css">
+  <link rel="stylesheet" href="libs/MarkerCluster.Default.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div id="app-container">
+
+    <!-- Top Floating Bar & Search -->
+    <header class="top-header">
+      <div class="search-box-wrapper">
+        <span class="search-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+        </span>
+        <input type="text" id="global-search-input" class="search-input" placeholder="بحث: رقم علبة (PCP)، هاتف (033...)، اسم، عنوان..." autocomplete="off">
+        <button id="btn-clear-search" class="btn-icon-clear" aria-label="مسح البحث">✕</button>
+      </div>
+      <!-- Instant Search Results Dropdown -->
+      <div id="search-dropdown" class="search-results-dropdown"></div>
+    </header>
+
+    <!-- Network / Tile Status Pill -->
+    <div id="network-status-pill" class="network-status-pill" title="انقر لإدارة الخريطة الأوفلاين">
+      <span id="status-dot" class="status-dot"></span>
+      <span id="status-text">أوفلاين جاهز</span>
+      <span id="tiles-badge" style="color: var(--primary); font-size: 10px;">(0 بلاطة)</span>
+    </div>
+
+    <!-- SCREEN 1: MAP SCREEN -->
+    <main id="screen-map">
+      <div id="map"></div>
+
+      <!-- Map Floating Action Controls -->
+      <div class="map-floating-controls">
+        <!-- Layer Switcher -->
+        <button id="btn-toggle-layer" class="fab-btn" title="تغيير نوع الخريطة (قمر صناعي / شوارع)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9.07l-9-7-9 7 1.63 1.27L12 16z"/>
+          </svg>
+        </button>
+        <!-- Offline Maps Manager Button -->
+        <button id="btn-open-offline-manager" class="fab-btn" title="تحميل خريطة بسكرة/طولقة للاستعمال أوفلاين">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+          </svg>
+        </button>
+        <!-- My Location GPS -->
+        <button id="btn-locate-me" class="fab-btn" title="تحديد موقعي الميداني بدقة GPS">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Main Add Box FAB -->
+      <button id="btn-main-add-box" class="main-add-fab">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+        <span>+ إضافة علبة</span>
+      </button>
+    </main>
+
+    <!-- SCREEN 2: BOXES LIST -->
+    <section id="screen-boxes-list" class="sub-screen">
+      <header class="screen-header">
+        <h1 class="screen-title">قائمة علب التوزيع الميدانية</h1>
+        <span id="boxes-total-count" class="res-badge">0 علبة</span>
+      </header>
+
+      <!-- Filter Chips -->
+      <div class="chips-scroll-row">
+        <button class="chip-btn active" data-filter="all">الكل</button>
+        <button class="chip-btn" data-filter="علبة توزيع رئيسية (PCP)">PCP رئيسية</button>
+        <button class="chip-btn" data-filter="كابينة ألياف بصرية (MSAN)">MSAN ألياف</button>
+        <button class="chip-btn" data-filter="علبة طرفية (DP)">DP طرفية</button>
+        <button class="chip-btn" data-filter="other">أخرى</button>
+      </div>
+
+      <!-- Sorting Bar -->
+      <div style="padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; background: var(--surface); border-bottom: 1px solid var(--border);">
+        <span style="font-size: 13px; color: var(--text-secondary); font-weight: 700;">ترتيب حسب:</span>
+        <select id="boxes-sort-select" class="form-select" style="width: auto; padding: 6px 12px; font-size: 13px;">
+          <option value="nearest">الأقرب إلى موقعي الحالي</option>
+          <option value="newest">الأحدث تسجيلاً</option>
+          <option value="name">الاسم / الرمز (أ - ي)</option>
+        </select>
+      </div>
+
+      <!-- Cards Container -->
+      <div id="boxes-cards-list" class="boxes-list-container">
+        <!-- Populated dynamically -->
+      </div>
+    </section>
+
+    <!-- SCREEN 3: BACKUP, RESTORE & SETTINGS -->
+    <section id="screen-settings" class="sub-screen">
+      <header class="screen-header">
+        <h1 class="screen-title">النسخ الاحتياطي والإعدادات</h1>
+      </header>
+
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 16px;">
+
+        <!-- Storage Persistence Card -->
+        <div class="box-card" style="flex-direction: column; cursor: default;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 15px; font-weight: 800; color: var(--primary);">حماية البيانات من المسح (Persist)</div>
+              <div id="persist-status-label" style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                التحقق من حالة الحماية...
+              </div>
+            </div>
+            <button id="btn-request-persist" class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;">
+              تفعيل الحماية
+            </button>
+          </div>
+        </div>
+
+        <!-- Export & Backup Options -->
+        <div class="box-card" style="flex-direction: column; gap: 12px; cursor: default;">
+          <h2 style="font-size: 15px; font-weight: 800; color: var(--text-primary);">تصدير واستيراد البيانات</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+            احفظ نسخة كاملة من جميع العلب والصور وقوائم المشتركين في هاتفك أو شاركها مع زملائك في الميدان.
+          </p>
+
+          <button id="btn-export-json" class="btn btn-primary btn-full">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+            تصدير نسخة احتياطية كاملة (JSON + صور)
+          </button>
+
+          <div style="position: relative;">
+            <input type="file" id="file-import-json" accept=".json" style="display: none;">
+            <button id="btn-import-json-trigger" class="btn btn-secondary btn-full">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+              </svg>
+              استيراد ودمج نسخة احتياطية (JSON)
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button id="btn-export-csv" class="btn btn-secondary">
+              📊 تصدير CSV (Excel)
+            </button>
+            <button id="btn-export-kml" class="btn btn-secondary">
+              🌍 تصدير KML (Google Earth)
+            </button>
+          </div>
+        </div>
+
+        <!-- Offline Maps Pack Manager -->
+        <div class="box-card" style="flex-direction: column; gap: 12px; cursor: default;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 15px; font-weight: 800; color: var(--text-primary);">خرائط بسكرة وطولقة الأوفلاين</h2>
+            <span id="settings-tiles-size" class="res-badge">0 ميغابايت</span>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+            قم بتنزيل بلاطات الخريطة مسبقاً قبل التوجه للميدان لتعمل الخريطة دون الحاجة للإنترنت إطلاقاً.
+          </p>
+          <button id="btn-open-tile-modal" class="btn btn-accent btn-full">
+            🗺️ إدارة وتحميل الخرائط للاستعمال بدون إنترنت
+          </button>
+        </div>
+
+        <!-- PWA Installation & Export Guide -->
+        <div class="box-card" style="flex-direction: column; gap: 10px; cursor: default;">
+          <h2 style="font-size: 15px; font-weight: 800; color: var(--primary);">تثبيت ونشر التطبيق (PWA / Web)</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+            يمكنك تثبيت هذا التطبيق مباشرة على شاشة هاتفك ليعمل كتطبيق أصلي، أو نشره مجاناً على GitHub Pages أو Netlify.
+          </p>
+          <button id="btn-open-pwa-guide" class="btn btn-secondary btn-full">
+            📱 طريقة التثبيت والنشر خطوة بخطوة
+          </button>
+        </div>
+
+        <!-- Theme Toggle -->
+        <div class="box-card" style="align-items: center; justify-content: space-between; cursor: default;">
+          <span style="font-size: 14px; font-weight: 700; color: var(--text-primary);">الوضع الليلي (Dark Mode)</span>
+          <button id="btn-toggle-dark-mode" class="btn btn-secondary" style="padding: 6px 14px; font-size: 13px;">
+            تفعيل الوضع الداكن
+          </button>
+        </div>
+
+        <!-- Algérie Télécom Field Info -->
+        <div style="text-align: center; padding: 20px 0; color: var(--text-muted); font-size: 12px;">
+          <div>اتصالات الجزائر - المديرية العملية بسكرة</div>
+          <div style="margin-top: 4px;">تطبيق إدارة علب التوزيع الميداني (PCP) • إصدار 1.0 (أوفلاين)</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+      <button class="nav-tab active" data-target="screen-map">
+        <svg viewBox="0 0 24 24">
+          <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>
+        </svg>
+        <span>الخريطة</span>
+      </button>
+
+      <button class="nav-tab" data-target="screen-boxes-list">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+        </svg>
+        <span>قائمة العلب</span>
+      </button>
+
+      <button class="nav-tab" data-target="screen-settings">
+        <svg viewBox="0 0 24 24">
+          <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+        </svg>
+        <span>النسخ والإعدادات</span>
+      </button>
+    </nav>
+
+    <!-- MODAL 1: ADD / EDIT BOX -->
+    <div id="modal-box-form" class="modal-overlay">
+      <div class="bottom-sheet">
+        <div class="bottom-sheet-handle"></div>
+        <div class="modal-header">
+          <h2 id="modal-box-title" class="modal-title">تسجيل علبة توزيع جديدة</h2>
+          <button class="modal-close-btn" data-close="modal-box-form">✕</button>
+        </div>
+
+        <form id="form-save-box" class="modal-body">
+          <input type="hidden" id="box-form-id">
+
+          <!-- Camera Trigger & Direct Photo Input -->
+          <div class="form-group">
+            <label class="form-label">صور العلبة (كاميرا الهاتف المباشرة أو المعرض)</label>
+            <div class="photo-upload-grid">
+              <label class="photo-add-box" title="تصوير بالكاميرا">
+                <input type="file" id="input-camera-file" accept="image/*" capture="environment" style="display: none;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12m-3.2 0a3.2 3.2 0 1 0 6.4 0a3.2 3.2 0 1 0 -6.4 0M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                </svg>
+                <span>تصوير فوري</span>
+              </label>
+
+              <label class="photo-add-box" title="اختيار من المعرض">
+                <input type="file" id="input-gallery-file" accept="image/*" multiple style="display: none;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <span>من المعرض</span>
+              </label>
+
+              <!-- Uploaded Preview Items -->
+              <div id="photos-preview-container" style="display: contents;"></div>
+            </div>
+          </div>
+
+          <!-- GPS Coordinates & Accuracy -->
+          <div class="gps-status-card">
+            <div class="gps-info">
+              <span id="form-gps-accuracy" class="gps-accuracy-val">دقة GPS: في انتظار الإشارة...</span>
+              <span id="form-gps-coords" class="gps-coords-text">خط العرض: -- / خط الطول: --</span>
+            </div>
+            <button type="button" id="btn-refresh-form-gps" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">
+              🔄 تحديث GPS
+            </button>
+          </div>
+
+          <!-- Manual Coordinates Toggle -->
+          <div style="display: flex; gap: 8px;">
+            <button type="button" id="btn-pick-from-map" class="btn btn-secondary" style="flex: 1; font-size: 13px;">
+              📍 اختيار الموقع على الخريطة
+            </button>
+          </div>
+
+          <div id="manual-coords-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label class="form-label">خط العرض (Latitude)</label>
+              <input type="number" step="any" id="box-lat" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">خط الطول (Longitude)</label>
+              <input type="number" step="any" id="box-lng" class="form-input" required>
+            </div>
+          </div>
+
+          <!-- Box Code (Required) -->
+          <div class="form-group">
+            <label class="form-label">اسم / رقم العلبة * (مثال: PCP-12 أو MSAN-04)</label>
+            <input type="text" id="box-code" class="form-input" placeholder="PCP-12" required>
+          </div>
+
+          <!-- Box Type -->
+          <div class="form-group">
+            <label class="form-label">نوع العلبة</label>
+            <select id="box-type" class="form-select">
+              <option value="علبة توزيع رئيسية (PCP)">علبة توزيع رئيسية (PCP)</option>
+              <option value="كابينة ألياف بصرية (MSAN)">كابينة ألياف بصرية (MSAN)</option>
+              <option value="علبة طرفية (DP)">علبة طرفية (DP)</option>
+              <option value="علبة توزيع فرعية (SR)">علبة توزيع فرعية (SR)</option>
+              <option value="مقسم بصري (ODF)">مقسم بصري (ODF)</option>
+              <option value="مقسم رئيسي (MDF)">مقسم خطوط رئيسي (MDF)</option>
+            </select>
+          </div>
+
+          <!-- Capacity / Ports -->
+          <div class="form-group">
+            <label class="form-label">سعة العلبة (عدد الأزواج أو المنافذ - اختياري)</label>
+            <input type="number" id="box-capacity" class="form-input" placeholder="مثال: 50 أو 100">
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label class="form-label">ملاحظات ميدانية (الموقع الدقيق، حالة القفل، الكوابل...)</label>
+            <textarea id="box-notes" class="form-textarea" placeholder="مثال: على جدار ثانوية طولقة، بجانب محول الكهرباء، بحاجة لتغيير القفل..."></textarea>
+          </div>
+
+          <div class="modal-footer" style="padding: 12px 0 0 0; border-top: none;">
+            <button type="submit" class="btn btn-primary" style="flex: 2;">💾 حفظ العلبة</button>
+            <button type="button" class="btn btn-secondary" style="flex: 1;" data-close="modal-box-form">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 2: BOX DETAILS BOTTOM SHEET -->
+    <div id="modal-box-detail" class="modal-overlay">
+      <div class="bottom-sheet">
+        <div class="bottom-sheet-handle"></div>
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h2 id="detail-box-code" class="modal-title">PCP-12</h2>
+            <span id="detail-box-type" class="box-type-badge">رئيسية</span>
+          </div>
+          <button class="modal-close-btn" data-close="modal-box-detail">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Photos Gallery -->
+          <div id="detail-gallery-row" class="detail-gallery"></div>
+
+          <!-- Quick Action Tiles -->
+          <div class="quick-actions-row">
+            <button id="btn-action-navigate" class="action-tile-btn">
+              <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+              <span>الاتجاهات</span>
+            </button>
+            <button id="btn-action-copy-coords" class="action-tile-btn">
+              <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+              <span>نسخ الإحداثيات</span>
+            </button>
+            <button id="btn-action-share" class="action-tile-btn">
+              <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+              <span>مشاركة</span>
+            </button>
+            <button id="btn-action-toggle-drag" class="action-tile-btn">
+              <svg viewBox="0 0 24 24"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/></svg>
+              <span id="drag-action-label">تعديل بالسحب</span>
+            </button>
+          </div>
+
+          <!-- Metadata Info Card -->
+          <div style="background: var(--bg); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 13px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">الإحداثيات:</span>
+              <span id="detail-coords-text" style="font-family: monospace; font-weight: 700;">--</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">دقة التسجيل:</span>
+              <span id="detail-accuracy-text">-- متر</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">المسافة من موقعي:</span>
+              <span id="detail-distance-text" style="color: var(--accent-green); font-weight: 700;">--</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary);">السعة / المنافذ:</span>
+              <span id="detail-capacity-text">--</span>
+            </div>
+            <div id="detail-notes-row" style="margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--border);">
+              <span style="color: var(--text-secondary); font-weight: 700;">ملاحظات:</span>
+              <p id="detail-notes-text" style="margin-top: 2px; line-height: 1.4;"></p>
+            </div>
+          </div>
+
+          <!-- SUBSCRIBERS SECTION -->
+          <div class="subscribers-section">
+            <div class="subscribers-header-row">
+              <h3 style="font-size: 15px; font-weight: 800; color: var(--text-primary);">
+                المشتركون المتصلون بالعلبة (<span id="detail-subs-count">0</span>)
+              </h3>
+              <button id="btn-open-add-subscriber" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;">
+                + إضافة مشترك
+              </button>
+            </div>
+
+            <div id="detail-subscribers-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Dynamic subscriber cards -->
+            </div>
+          </div>
+
+          <!-- Edit & Delete Box Buttons -->
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button id="btn-edit-box-trigger" class="btn btn-secondary" style="flex: 1;">
+              ✏️ تعديل بيانات العلبة
+            </button>
+            <button id="btn-delete-box-trigger" class="btn btn-danger" style="flex: 1;">
+              🗑️ حذف العلبة
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 3: ADD / EDIT SUBSCRIBER -->
+    <div id="modal-subscriber-form" class="modal-overlay">
+      <div class="bottom-sheet" style="max-height: 75vh;">
+        <div class="bottom-sheet-handle"></div>
+        <div class="modal-header">
+          <h2 id="modal-sub-title" class="modal-title">إضافة مشترك جديد</h2>
+          <button class="modal-close-btn" data-close="modal-subscriber-form">✕</button>
+        </div>
+
+        <form id="form-save-subscriber" class="modal-body">
+          <input type="hidden" id="sub-form-id">
+
+          <div class="form-group">
+            <label class="form-label">رقم الهاتف الثابت * (مثال: 033 68 XX XX)</label>
+            <input type="tel" id="sub-phone" class="form-input" placeholder="033XXXXXX" required style="font-family: monospace;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">اسم المشترك / الزبون *</label>
+            <input type="text" id="sub-name" class="form-input" placeholder="الاسم واللقب أو المحل التجاري" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">العنوان / رقم المنزل</label>
+            <input type="text" id="sub-address" class="form-input" placeholder="الشارع، رقم المسكن أو المعلم">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">رقم الزوج / المنفذ في العلبة (اختياري)</label>
+            <input type="text" id="sub-port" class="form-input" placeholder="مثال: زوج 05، منفذ 12...">
+          </div>
+
+          <div class="modal-footer" style="padding: 12px 0 0 0; border-top: none;">
+            <button type="submit" class="btn btn-primary" style="flex: 2;">حفظ المشترك</button>
+            <button type="button" class="btn btn-secondary" style="flex: 1;" data-close="modal-subscriber-form">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL 4: OFFLINE TILES DOWNLOAD MANAGER -->
+    <div id="modal-offline-manager" class="modal-overlay">
+      <div class="bottom-sheet">
+        <div class="bottom-sheet-handle"></div>
+        <div class="modal-header">
+          <h2 class="modal-title">تحميل خرائط بسكرة وطولقة للاستعمال أوفلاين</h2>
+          <button class="modal-close-btn" data-close="modal-offline-manager">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+            تتيح لك هذه الميزة تخزين بلاطات الخريطة في ذاكرة هاتفك (IndexedDB) للوصول إليها في الميدان عند انعدام التغطية أو في وضع الطيران.
+          </p>
+
+          <!-- Current Storage Statistics -->
+          <div style="background: var(--primary-surface); padding: 12px; border-radius: var(--radius-sm); border: 1px solid #bfdbfe;">
+            <div style="font-size: 14px; font-weight: 800; color: var(--primary-dark);">البيانات المخزنة حالياً في الجهاز:</div>
+            <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 13px;">
+              <span>عدد البلاطات المحفوظة:</span>
+              <strong id="modal-tiles-count">0 بلاطة</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 13px;">
+              <span>المساحة التقريبية:</span>
+              <strong id="modal-tiles-size">0.0 ميغابايت</strong>
+            </div>
+          </div>
+
+          <!-- Download Packs Selection -->
+          <div class="form-group">
+            <label class="form-label">اختر المنطقة ومستوى التقريب المراد تحميله:</label>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+                <input type="radio" name="tile-region-pack" value="tolga" checked>
+                <div>
+                  <div style="font-weight: 700; font-size: 14px;">مدينة طولقة (دقة عالية جداً Z14 - Z18)</div>
+                  <div style="font-size: 12px; color: var(--text-secondary);">حوالي 350 - 500 بلاطة (~12 ميغابايت) - تفاصيل الشوارع والمباني</div>
+                </div>
+              </label>
+
+              <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+                <input type="radio" name="tile-region-pack" value="biskra">
+                <div>
+                  <div style="font-weight: 700; font-size: 14px;">ولاية بسكرة والمحيط (تقريب عام Z10 - Z14)</div>
+                  <div style="font-size: 12px; color: var(--text-secondary);">حوالي 250 بلاطة (~6 ميغابايت) - الطرق الوطنية والبلديات</div>
+                </div>
+              </label>
+
+              <label style="display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+                <input type="radio" name="tile-region-pack" value="full">
+                <div>
+                  <div style="font-weight: 700; font-size: 14px;">الحزمة الشاملة (ولاية بسكرة + مدينة طولقة كاملة)</div>
+                  <div style="font-size: 12px; color: var(--text-secondary);">الحزمة الموصى بها قبل الخروج للميدان (~18 ميغابايت)</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tile Type Layer -->
+          <div class="form-group">
+            <label class="form-label">نوع الخريطة للتحميل:</label>
+            <select id="select-tile-layer-type" class="form-select">
+              <option value="streets">الخريطة العادية (شوارع OpenStreetMap)</option>
+              <option value="satellite">صور الأقمار الصناعية (Satellite)</option>
+            </select>
+          </div>
+
+          <!-- Progress Bar Area -->
+          <div id="tile-download-progress-box" style="display: none; background: var(--bg); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
+              <span id="tile-progress-status-text">جاري التحميل...</span>
+              <span id="tile-progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div id="tile-progress-fill" class="progress-bar-fill"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+              <span id="tile-progress-counts">0 / 0 بلاطة</span>
+              <span id="tile-progress-errors" style="color: var(--accent-red);"></span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 8px;">
+            <button id="btn-start-tile-download" class="btn btn-primary" style="flex: 2;">
+              ⬇️ بدء تحميل الخريطة
+            </button>
+            <button id="btn-cancel-tile-download" class="btn btn-secondary" style="flex: 1; display: none;">
+              إلغاء
+            </button>
+          </div>
+
+          <!-- Clear Offline Cache Button -->
+          <div style="padding-top: 12px; border-top: 1px dashed var(--border); margin-top: 8px;">
+            <button id="btn-clear-tile-cache" class="btn btn-danger btn-full" style="font-size: 13px;">
+              🗑️ حذف جميع بلاطات الخرائط المخزنة لتوفير المساحة
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 5: PWA INSTALLATION & DEPLOYMENT GUIDE -->
+    <div id="modal-pwa-guide" class="modal-overlay">
+      <div class="bottom-sheet" style="max-height: 80vh;">
+        <div class="bottom-sheet-handle"></div>
+        <div class="modal-header">
+          <h2 class="modal-title">طريقة تثبيت ونشر التطبيق على الهاتف</h2>
+          <button class="modal-close-btn" data-close="modal-pwa-guide">✕</button>
+        </div>
+
+        <div class="modal-body" style="font-size: 13px; line-height: 1.6; color: var(--text-primary);">
+          <div style="background: var(--primary-surface); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 12px;">
+            <strong style="color: var(--primary-dark); font-size: 14px;">1) التثبيت المباشر على الهاتف (بدون إنترنت لاحقاً):</strong>
+            <ol style="margin: 8px 18px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px;">
+              <li>افتح الرابط في متصفح <strong>Google Chrome</strong> على هاتف أندرويد.</li>
+              <li>اضغط على قائمة المتصفح (النقاط الثلاث <strong>⋮</strong> في الأعلى).</li>
+              <li>اختر <strong>"إضافة إلى الشاشة الرئيسية" (Add to Home screen)</strong> أو <strong>"تثبيت التطبيق" (Install App)</strong>.</li>
+              <li>سيظهر أيقونة التطبيق على شاشة هاتفك مثل أي تطبيق أصلي ويفتح مباشرة بدون إنترنت!</li>
+            </ol>
+          </div>
+
+          <div style="background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 12px;">
+            <strong style="color: var(--text-primary); font-size: 14px;">2) كيفية النشر على Netlify أو GitHub Pages:</strong>
+            <ol style="margin: 8px 18px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px;">
+              <li>قم بتصدير ملفات التطبيق (أو أخذ مجلد <code>assets/www</code>).</li>
+              <li><strong>على Netlify:</strong> سجل في <a href="https://app.netlify.com" target="_blank" style="color: var(--primary);">Netlify.com</a> واسحب مجلد الملفات مباشرة (Drag & Drop) ليصبح تطبيقك أونلاين فوراً برابط مجاني دائم ومشفر HTTPS!</li>
+              <li><strong>على GitHub Pages:</strong> أنشئ مستودعاً جديداً وضع فيه الملفات، ثم فعّل GitHub Pages من تبويب Settings.</li>
+            </ol>
+          </div>
+
+          <div style="background: #fef3c7; border: 1px solid #fde68a; padding: 12px; border-radius: var(--radius-sm);">
+            <strong style="color: #92400e;">💡 نصيحة ميدانية هامة:</strong>
+            <p style="margin-top: 4px; color: #78350f;">
+              قبل الخروج إلى الميدان في بسكرة أو طولقة، افتح تبويب "إدارة الخرائط أوفلاين" واضغط "بدء تحميل الخريطة" وأنت متصل بشبكة Wi-Fi. بعد اكتمال التحميل يمكنك إطفاء الإنترنت وستعمل الخريطة ونظام GPS بكفاءة تامة!
+            </p>
+          </div>
+
+          <button class="btn btn-primary btn-full" style="margin-top: 10px;" data-close="modal-pwa-guide">
+            فهمت ذلك، شكراً
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULLSCREEN PHOTO LIGHTBOX -->
+    <div id="lightbox-overlay" class="modal-overlay" style="background: rgba(0,0,0,0.92); z-index: 3500; align-items: center;">
+      <button id="btn-close-lightbox" style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.2); border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer;">✕</button>
+      <img id="lightbox-img" style="max-width: 95vw; max-height: 90vh; object-fit: contain; border-radius: var(--radius-sm);" alt="معاينة الصورة المكبرة">
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container"></div>
+
+  </div>
+
+  <!-- Application Logic Scripts -->
+  <script src="libs/leaflet.js"></script>
+  <script src="libs/leaflet.markercluster.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/tileManager.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
